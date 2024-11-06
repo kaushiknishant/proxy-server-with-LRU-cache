@@ -1,25 +1,31 @@
 package org.example;
 
-import com.sun.net.httpserver.HttpServer;
 import org.example.server.Server;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import static java.lang.System.*;
 
 /**
- * Hello world!
- *
+ * Server!
  */
-public class App 
-{
-    public static void main( String[] args ) throws IOException {
-        HttpServer httpServer = HttpServer.create(new InetSocketAddress(8080), 0);
-        Server handler =  new Server();
-        httpServer.createContext("/",handler);
-        httpServer.start();
+public class App {
+    private static final int PORT = 8080;
+    private static final int MAX_THREADS = 10;
 
-        out.println("Server started on port 8080");
+    public static void main(String[] args) {
+        ExecutorService threadPool = Executors.newFixedThreadPool(MAX_THREADS);
+        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+            System.out.println("Proxy server is running on port " + PORT);
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                threadPool.execute(new Server(clientSocket));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

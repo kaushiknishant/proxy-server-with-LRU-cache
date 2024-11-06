@@ -1,13 +1,15 @@
 package org.example.cache;
 
-public class CacheElement {
-    StringBuilder data;
-    int len;
-    StringBuilder url;
-    long lruTimeTrack;
-    CacheElement next;
+import java.time.Instant;
 
-    public CacheElement(StringBuilder data, int len, StringBuilder url, long lruTimeTrack) {
+public class CacheElement {
+    private byte[] data;
+    private int len;
+    private String url;
+    private Instant lruTimeTrack;;
+    public CacheElement next;
+
+    public CacheElement(byte[] data, int len, String url, Instant lruTimeTrack) {
         this.data = data;
         this.len = len;
         this.url = url;
