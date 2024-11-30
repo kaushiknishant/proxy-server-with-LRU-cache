@@ -20,12 +20,26 @@ public class App {
         ExecutorService threadPool = Executors.newFixedThreadPool(MAX_THREADS);
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Proxy server is running on port " + PORT);
+            
+            // Add shutdown hook to clean up resources
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                threadPool.shutdown();
+                System.out.println("Server shutting down...");
+            }));
+            
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                threadPool.execute(new Server(clientSocket));
+                System.out.println("Client connected from " + clientSocket.getInetAddress());
+                try {
+                    threadPool.execute(new Server(clientSocket));
+                } catch (Exception e) {
+                    System.err.println("Error handling client connection: " + e.getMessage());
+                    clientSocket.close();
+                }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Server error: " + e.getMessage());
+            threadPool.shutdown();
         }
     }
 }
